@@ -1,9 +1,8 @@
 import { useEffect } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useOutletContext } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../store/authSlice';
 import { fetchBookings } from '../store/bookingsSlice';
-import useRealtime from '../hooks/useRealtime';
 import ToastHost from './ToastHost';
 
 const LIVE_TEXT = { live: 'Live', connecting: 'Connecting...', offline: 'Offline' };
@@ -12,7 +11,7 @@ export default function DashboardLayout() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((s) => s.auth.user);
-  const live = useRealtime();
+  const { live, openBooking } = useOutletContext();
 
   useEffect(() => { dispatch(fetchBookings()); }, [dispatch]);
 
@@ -42,7 +41,7 @@ export default function DashboardLayout() {
             </button>
           </div>
         </header>
-        <main className="content"><Outlet /></main>
+        <main className="content"><Outlet context={{ openBooking }} /></main>
       </div>
       <ToastHost />
     </div>

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useOutletContext } from 'react-router-dom';
 import { fetchBookings } from '../store/bookingsSlice';
-import BookingModal from '../components/BookingModal';
 import StatusBadge from '../components/StatusBadge';
 import { ErrorBox, Spinner } from '../components/ui';
 import { STATUS, fmtDateTime } from '../utils';
@@ -11,10 +11,9 @@ const FILTERS = ['all', ...Object.keys(STATUS)];
 export default function BookingsPage() {
   const dispatch = useDispatch();
   const { items, status, error } = useSelector((s) => s.bookings);
+  const { openBooking } = useOutletContext();
   const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
-  const [selectedId, setSelectedId] = useState(null);
-  const selected = items.find((b) => b._id === selectedId);
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -58,14 +57,13 @@ export default function BookingsPage() {
                   <td>{b.customer?.name}<div className="muted">{b.customer?.email}</div></td>
                   <td>{b.service?.name}</td>
                   <td><StatusBadge status={b.status} /></td>
-                  <td><button className="btn btn-small btn-ghost" onClick={() => setSelectedId(b._id)}>Open</button></td>
+                  <td><button className="btn btn-small btn-ghost" onClick={() => openBooking(b)}>Open</button></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
-      {selected && <BookingModal key={selected._id + selected.updatedAt} booking={selected} onClose={() => setSelectedId(null)} />}
     </div>
   );
 }

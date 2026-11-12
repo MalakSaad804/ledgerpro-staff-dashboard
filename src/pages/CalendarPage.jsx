@@ -1,20 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useOutletContext } from 'react-router-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import { fetchBookings } from '../store/bookingsSlice';
-import BookingModal from '../components/BookingModal';
 import { ErrorBox, Spinner } from '../components/ui';
 import { STATUS } from '../utils';
 
 export default function CalendarPage() {
   const dispatch = useDispatch();
   const { items, status, error } = useSelector((s) => s.bookings);
-  const [selectedId, setSelectedId] = useState(null);
-  const selected = items.find((b) => b._id === selectedId);
+  const { openBooking } = useOutletContext();
 
   // turn bookings into calendar events, coloured by status
   const events = useMemo(
@@ -53,7 +52,10 @@ export default function CalendarPage() {
           }}
           buttonText={{ today: 'Today', month: 'Month', week: 'Week', day: 'Day', list: 'List' }}
           events={events}
-          eventClick={(info) => setSelectedId(info.event.id)}
+          eventClick={(info) => {
+            const booking = items.find((item) => item._id === info.event.id);
+            if (booking) openBooking(booking);
+          }}
           slotMinTime="08:00:00"
           slotMaxTime="19:00:00"
           allDaySlot={false}
@@ -63,7 +65,6 @@ export default function CalendarPage() {
           noEventsText="No appointments in this period"
         />
       </div>
-      {selected && <BookingModal key={selected._id + selected.updatedAt} booking={selected} onClose={() => setSelectedId(null)} />}
     </div>
   );
 }
